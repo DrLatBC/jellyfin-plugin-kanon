@@ -80,6 +80,8 @@ Kanon only processes series it identifies as anime. There are four identificatio
 - **Tag**: only series with the target tag (default `Anime`, case-insensitive). This is useful for limiting Kanon to particular shows.
 - **Genre and Tag**: the series needs both.
 
+**Anime libraries:** tick one or more libraries in Kanon's settings, and every series in them counts as anime, whatever its genres and tags. This suits libraries matched by Shoko, AniDB or similar providers, which rarely label anime with an "Anime" genre or tag. Series outside the ticked libraries are still matched by the mode above.
+
 Kanon never moves, renames or re-seasons episodes. It only adds tags, skip segments and playlists.
 
 ## Changes from Ronin
@@ -89,6 +91,7 @@ Kanon never moves, renames or re-seasons episodes. It only adds tags, skip segme
 - No-filler playlists.
 - Absolute episode numbers from the library's own numbering, so TMDB libraries work without TheTVDB or AniDB.
 - Anime identification defaults to Genre or Tag, so TMDB libraries are found.
+- Whole libraries can be marked as anime ([Ronin #5](https://github.com/ahza-code/jellyfin-plugin-ronin/issues/5)).
 - Ronin's season re-organisation tasks (Aired Seasons and Force Single Season) are removed. Kanon leaves the library layout alone.
 - Renamed, with a new plugin ID, so it installs alongside or instead of Ronin without conflicts.
 

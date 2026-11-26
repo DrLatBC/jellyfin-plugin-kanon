@@ -1,3 +1,4 @@
+using System;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.Kanon.Configuration;
@@ -39,6 +40,12 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Tag name used when AnimeIdentificationMode includes Tag.
     /// </summary>
     public string AnimeTargetTag { get; set; } = "Anime";
+
+    /// <summary>
+    /// Gets or sets the ids of libraries whose every series is treated as anime, on top of the
+    /// genre and tag identification.
+    /// </summary>
+    public string[] AnimeLibraryIds { get; set; } = Array.Empty<string>();
 
     /// <summary>
     /// Gets or sets the media segment type that covers Filler episodes (a MediaSegmentType name, or empty for none).

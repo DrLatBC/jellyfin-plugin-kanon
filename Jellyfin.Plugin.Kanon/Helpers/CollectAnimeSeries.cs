@@ -32,10 +32,27 @@ public static class CollectAnimeSeries
         })
         .Cast<Series>();
 
+        var animeLibraries = (config.AnimeLibraryIds ?? Array.Empty<string>())
+            .Select(id => Guid.TryParse(id, out var guid) ? guid : Guid.Empty)
+            .Where(guid => guid != Guid.Empty)
+            .ToHashSet();
+
         return allSeries
-            .Where(s => IsAnime(s, config))
+            .Where(s => InAnimeLibrary(s, animeLibraries, libraryManager) || IsAnime(s, config))
             .ToList()
             .AsReadOnly();
+    }
+
+    // Every series in a library the user marked as anime counts, whatever its genres and tags say:
+    // providers such as Shoko or AniDB rarely label anime with an "Anime" genre or tag.
+    private static bool InAnimeLibrary(Series series, HashSet<Guid> animeLibraries, ILibraryManager libraryManager)
+    {
+        if (animeLibraries.Count == 0)
+        {
+            return false;
+        }
+
+        return libraryManager.GetCollectionFolders(series).Any(folder => animeLibraries.Contains(folder.Id));
     }
 
     private static bool IsAnime(Series series, PluginConfiguration config)

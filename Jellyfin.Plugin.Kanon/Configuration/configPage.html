@@ -83,6 +83,12 @@
                     <div class="fieldDescription">Tag name to match when identification mode includes "Tag". Default: Anime</div>
                 </div>
 
+                <div class="verticalSection" style="margin-bottom: 2em;">
+                    <div class="inputLabel" style="margin-bottom: 0.5em;">Anime libraries</div>
+                    <div id="animeLibraries"></div>
+                    <div class="fieldDescription">Every series in a checked library is treated as anime, whatever its genres and tags. Use this when your metadata provider (for example Shoko or AniDB) doesn't label anime with an "Anime" genre or tag. Series elsewhere are still matched by the mode above.</div>
+                </div>
+
                 <h3 class="sectionTitle">Filler skipping</h3>
                 <div class="fieldDescription" style="margin-bottom: 1.5em;">
                     Each class below can be covered by a media segment spanning the whole episode. Whether that episode is then skipped,
@@ -156,10 +162,30 @@
                     });
                 }
 
+                function escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+
+                function renderLibraries(folders, selected) {
+                    page.querySelector('#animeLibraries').innerHTML = folders.map(function (folder) {
+                        const checked = selected.indexOf(folder.ItemId) >= 0 ? ' checked' : '';
+                        return '<label class="emby-checkbox-label" style="display: block;">'
+                            + '<input type="checkbox" is="emby-checkbox" class="emby-checkbox" data-library-id="' + escapeHtml(folder.ItemId) + '"' + checked + ' />'
+                            + '<span class="checkboxLabel">' + escapeHtml(folder.Name) + '</span>'
+                            + '<span class="checkboxOutline"><span class="material-icons checkboxIcon checkboxIcon-checked check" aria-hidden="true"></span>'
+                            + '<span class="material-icons checkboxIcon checkboxIcon-unchecked " aria-hidden="true"></span></span>'
+                            + '</label>';
+                    }).join('');
+                }
+
                 function loadConfig() {
                     Dashboard.showLoadingMsg();
-                    window.ApiClient.getPluginConfiguration(pluginId)
-                        .then(function (config) {
+                    Promise.all([window.ApiClient.getPluginConfiguration(pluginId), window.ApiClient.getVirtualFolders()])
+                        .then(function (results) {
+                            const config = results[0];
+                            renderLibraries(results[1] || [], config.AnimeLibraryIds || []);
                             field('ShowBadgesOnEpisodePage').checked = config.ShowBadgesOnEpisodePage;
                             field('ShowBadgesOnSeasonList').checked = config.ShowBadgesOnSeasonList;
                             field('EnableBadgeColors').checked = config.EnableBadgeColors;
@@ -189,7 +215,10 @@
                         FillerSegmentType: field('FillerSegmentType').value,
                         MixedSegmentType: field('MixedSegmentType').value,
                         AnimeCanonSegmentType: field('AnimeCanonSegmentType').value,
-                        PlaylistExcludeMixed: field('PlaylistExcludeMixed').checked
+                        PlaylistExcludeMixed: field('PlaylistExcludeMixed').checked,
+                        AnimeLibraryIds: Array.prototype.map.call(
+                            page.querySelectorAll('[data-library-id]:checked'),
+                            function (input) { return input.getAttribute('data-library-id'); })
                     };
                     window.ApiClient.updatePluginConfiguration(pluginId, config)
                         .then(Dashboard.processPluginConfigurationUpdateResult)
