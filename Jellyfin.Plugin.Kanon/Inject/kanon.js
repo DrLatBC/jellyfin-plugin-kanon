@@ -1,11 +1,11 @@
 (function() {
     'use strict';
-    console.log('--- [ RONIN ]: Script Start (Type-Check Mode) ---');
+    console.log('--- [ KANON ]: Script Start (Type-Check Mode) ---');
 
     let lastProcessedItemId = null;
     let mutationTimeout = null;
     const MUTATION_DEBOUNCE_MS = 50;
-    const cfg = window.RoninVariables || {};
+    const cfg = window.KanonVariables || {};
 
     // --- Helper Functions ---
     function getItemIdFromUrl() {
@@ -29,16 +29,16 @@
         const badge = document.createElement('div');
         badge.className = `mediaInfoItem anime-tag-badge ${tagClass}`;
         // Optional color class
-        if (cfg.RONIN_ENABLE_BADGE_COLORS === true) {
+        if (cfg.KANON_ENABLE_BADGE_COLORS === true) {
             badge.classList.add('colored');
         }
         badge.textContent = tag;
             
         if (targetElement) {
             targetElement.appendChild(badge);
-            console.log('[ RONIN ]: Appended badge...');
+            console.log('[ KANON ]: Appended badge...');
         } else {
-            console.log('[ RONIN ]: Failed to target element for injection...');
+            console.log('[ KANON ]: Failed to target element for injection...');
         }
     }
     
@@ -46,7 +46,7 @@
 
     async function fetchItemData(itemId) {
         if (!window.ApiClient) {
-            console.warn('[ RONIN ]: ApiClient not ready yet.');
+            console.warn('[ KANON ]: ApiClient not ready yet.');
             return null;
         }
         const userId = ApiClient.getCurrentUserId();
@@ -62,7 +62,7 @@
         const episodeElements = document.querySelectorAll('.listItem[data-type="Episode"]');
         if (episodeElements.length === 0) return; // DOM not ready yet, observer will retry
 
-        console.log('[ RONIN ]: Type is Season/Series. Processing list...');
+        console.log('[ KANON ]: Type is Season/Series. Processing list...');
         lastProcessedItemId = seasonId;
         
         const userId = ApiClient.getCurrentUserId();
@@ -79,7 +79,7 @@
             }, {});
 
             if (Object.keys(episodeTagMap).length === 0) {
-                console.log('[ RONIN ]: No episodes matched tags — skipping injection.');
+                console.log('[ KANON ]: No episodes matched tags — skipping injection.');
                 return;
             }
             
@@ -102,7 +102,7 @@
         const miscInfoElements = document.querySelectorAll('.itemMiscInfo-primary');
         if (miscInfoElements.length === 0) return; // DOM not ready yet, observer will retry
 
-        console.log('[ RONIN ]: Type is Episode. Injecting into header...');
+        console.log('[ KANON ]: Type is Episode. Injecting into header...');
         lastProcessedItemId = itemId;
 
         const matchingTag = getMatchingTag(itemData.Tags);
@@ -136,14 +136,14 @@
         // 2. Route based on "Type"
         if (itemData.Type === 'Episode') {
             // Honor config: skip if disabled
-            if (!cfg.RONIN_SHOW_EPISODE_BADGES) {
+            if (!cfg.KANON_SHOW_EPISODE_BADGES) {
                 lastProcessedItemId = itemId;
                 return;
             }
             processEpisodeView(itemId, itemData);
         } 
         else if (itemData.Type === 'Season') {
-            if (!cfg.RONIN_SHOW_SEASON_LIST_BADGES) {
+            if (!cfg.KANON_SHOW_SEASON_LIST_BADGES) {
                 lastProcessedItemId = itemId;
                 return;
             }
@@ -154,8 +154,83 @@
         }
     }
 
+    // --- Play queue pruning ---
+    // Skipping a filler episode through its media segment still loads and starts it, so a long filler
+    // run crawls past one episode at a time. When playback starts, queued episodes whose segment type
+    // the user has set to Skip are removed from the play queue instead, so playback runs canon to canon.
+
+    // jellyfin-web does not expose its playback manager; reach it through the webpack module registry.
+    function findPlaybackManager() {
+        const chunks = self.webpackChunk;
+        if (!chunks) return null;
+        let require = null;
+        chunks.push([['kanon-probe'], {}, function (r) { require = r; }]);
+        if (!require || !require.m) return null;
+        for (const id of Object.keys(require.m)) {
+            if (!String(require.m[id]).includes('_playQueueManager=new')) continue;
+            const exports = require(id);
+            for (const key of Object.keys(exports)) {
+                const value = exports[key];
+                if (value && typeof value.removeFromPlaylist === 'function' && typeof value.getPlaylist === 'function') {
+                    return value;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Media Segment Actions are stored per user and device by jellyfin-web's userSettings.
+    function segmentAction(userId, type) {
+        try {
+            return localStorage.getItem(userId + '-segmentTypeAction__' + type) || 'None';
+        } catch (e) {
+            return 'None';
+        }
+    }
+
+    async function pruneQueue(playbackManager) {
+        const segmentTypes = cfg.KANON_SEGMENT_TYPES || {};
+        const userId = ApiClient.getCurrentUserId();
+        const skipTags = Object.keys(segmentTypes).filter(tag =>
+            segmentTypes[tag] && segmentAction(userId, segmentTypes[tag]) === 'Skip');
+        if (skipTags.length === 0) return;
+
+        const playlist = await playbackManager.getPlaylist();
+        const currentId = playbackManager.getCurrentPlaylistItemId && playbackManager.getCurrentPlaylistItemId();
+        const queued = (playlist || []).filter(item =>
+            item.Type === 'Episode' && item.PlaylistItemId !== currentId);
+        if (queued.length === 0) return;
+
+        const remove = [];
+        for (let i = 0; i < queued.length; i += 100) {
+            const batch = queued.slice(i, i + 100);
+            const result = await ApiClient.getItems(userId, { Ids: batch.map(item => item.Id).join(','), Fields: 'Tags' });
+            const skip = new Set((result.Items || [])
+                .filter(item => (item.Tags || []).some(tag => skipTags.includes(tag)))
+                .map(item => item.Id));
+            batch.forEach(item => { if (skip.has(item.Id)) remove.push(item.PlaylistItemId); });
+        }
+
+        if (remove.length > 0) {
+            console.log(`[ KANON ]: Removing ${remove.length} skipped episodes from the play queue.`);
+            playbackManager.removeFromPlaylist(remove);
+        }
+    }
+
+    function initializeQueuePruning() {
+        const playbackManager = findPlaybackManager();
+        if (!playbackManager || !window.Events) {
+            console.warn('[ KANON ]: Playback manager not found; filler stays in the play queue.');
+            return;
+        }
+        window.Events.on(playbackManager, 'playbackstart', function () {
+            pruneQueue(playbackManager).catch(error => console.error('[ KANON ]: Queue pruning failed', error));
+        });
+    }
+
     // --- Initialization ---
     function initializeObserver() {
+        initializeQueuePruning();
         processPage(); 
         window.addEventListener('hashchange', () => {
             lastProcessedItemId = null; // Reset on navigation
@@ -176,7 +251,7 @@
     const waitForJellyfin = setInterval(() => {
         if (window.ApiClient && window.ApiClient.getCurrentUserId) {
             clearInterval(waitForJellyfin);
-            console.log('[ RONIN ]: Jellyfin Core Loaded. Initializing.');
+            console.log('[ KANON ]: Jellyfin Core Loaded. Initializing.');
             
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', initializeObserver);

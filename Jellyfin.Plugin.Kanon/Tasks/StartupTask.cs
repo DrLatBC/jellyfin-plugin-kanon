@@ -9,13 +9,13 @@ using System.Reflection;
 using System.Runtime.Loader;
 
 using Newtonsoft.Json.Linq;
-using Jellyfin.Plugin.Ronin.Helpers;
+using Jellyfin.Plugin.Kanon.Helpers;
 
-namespace Jellyfin.Plugin.Ronin.Tasks;
+namespace Jellyfin.Plugin.Kanon.Tasks;
 
 /// <summary>
 /// Startup task responsible for registering UI script and style injections
-/// using the FileTransformation plugin, enabling the Ronin front-end integration.
+/// using the FileTransformation plugin, enabling the Kanon front-end integration.
 /// </summary>
 public class StartupTask : IScheduledTask
 {
@@ -33,11 +33,11 @@ public class StartupTask : IScheduledTask
     /// <inheritdoc />
     public string Name => "Front-End Startup";
     /// <inheritdoc />
-    public string Key => "RoninStartup";
+    public string Key => "KanonStartup";
     /// <inheritdoc />
-    public string Description => "Registers UI script and style injections for Ronin.";
+    public string Description => "Registers UI script and style injections for Kanon.";
     /// <inheritdoc />
-    public string Category => "Ronin";
+    public string Category => "Kanon";
 
     /// <summary>
     /// Returns the default triggers for this task.  
@@ -62,10 +62,10 @@ public class StartupTask : IScheduledTask
     /// <returns>A completed task when the process finishes.</returns>
     public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Ronin startup: registering frontend transformations.");
+        _logger.LogInformation("Kanon startup: registering frontend transformations.");
 
         var payload = new JObject();
-        payload.Add("id", "c9f33c97-6da4-4ed3-819f-0a1ec77f2b34");
+        payload.Add("id", "d1a727c4-7183-40cf-bb06-01a2177dc889");
         payload.Add("fileNamePattern", "index.html");
         payload.Add("callbackAssembly", GetType().Assembly.FullName);
         payload.Add("callbackClass", typeof(TransformationPatch).FullName);
@@ -79,7 +79,7 @@ public class StartupTask : IScheduledTask
 
         if (fileTransformationAssembly == null)
         {
-            _logger.LogWarning("Ronin: FileTransformation plugin not found. UI injection will not work.");
+            _logger.LogWarning("Kanon: FileTransformation plugin not found. UI injection will not work.");
             return Task.CompletedTask;
         }
 
@@ -87,13 +87,13 @@ public class StartupTask : IScheduledTask
 
         if (pluginInterfaceType == null)
         {
-            _logger.LogWarning("Ronin: FileTransformation PluginInterface not found.");
+            _logger.LogWarning("Kanon: FileTransformation PluginInterface not found.");
             return Task.CompletedTask;
         }
 
         pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object?[] { payload });
 
-        _logger.LogInformation("Ronin: transformations registered successfully.");
+        _logger.LogInformation("Kanon: transformations registered successfully.");
         return Task.CompletedTask;
     }
 }

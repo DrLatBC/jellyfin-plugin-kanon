@@ -1,9 +1,9 @@
 using MediaBrowser.Model.Plugins;
 
-namespace Jellyfin.Plugin.Ronin.Configuration;
+namespace Jellyfin.Plugin.Kanon.Configuration;
 
 /// <summary>
-/// Plugin configuration for Ronin.
+/// Plugin configuration for Kanon.
 /// Contains settings used by the plugin tasks and frontend injection.
 /// </summary>
 public class PluginConfiguration : BasePluginConfiguration
@@ -30,9 +30,10 @@ public class PluginConfiguration : BasePluginConfiguration
 
     /// <summary>
     /// Determines how anime series are identified (Genre, Tag, or combination).
+    /// Defaults to Genre or Tag: TMDB files anime under the "Animation" genre and marks it with an "anime" keyword tag.
     /// </summary>
     public AnimeIdentificationMode AnimeIdentificationMode { get; set; }
-        = AnimeIdentificationMode.Genre;
+        = AnimeIdentificationMode.GenreOrTag;
 
     /// <summary>
     /// Tag name used when AnimeIdentificationMode includes Tag.
@@ -40,20 +41,25 @@ public class PluginConfiguration : BasePluginConfiguration
     public string AnimeTargetTag { get; set; } = "Anime";
 
     /// <summary>
-    /// Gets or sets a value indicating whether to trigger a non-destructive metadata refresh for each series after its episodes have been re-indexed. 
-    /// This updates the UI episode counts and season structure immediately.
+    /// Gets or sets the media segment type that covers Filler episodes (a MediaSegmentType name, or empty for none).
+    /// The per-user Media Segment Actions setting for that type decides whether the episode is skipped, offered for skipping or played.
     /// </summary>
-    public bool RefreshSeriesAfterProcessed { get; set; } = true;
+    public string FillerSegmentType { get; set; } = "Commercial";
 
     /// <summary>
-    /// Gets or sets a value indicating whether to rename the season folder when all episodes are merged into a single season.
+    /// Gets or sets the media segment type that covers Mixed Canon/Filler episodes (empty for none).
     /// </summary>
-    public bool RenameWhenSingleSeason { get; set; } = true;
+    public string MixedSegmentType { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the name to assign to the single season when merging all episodes into one season.
+    /// Gets or sets the media segment type that covers Anime Canon episodes (empty for none).
     /// </summary>
-    public string SingleSeasonName { get; set; } = "Episodes";
+    public string AnimeCanonSegmentType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether no-filler playlists also leave out Mixed Canon/Filler episodes.
+    /// </summary>
+    public bool PlaylistExcludeMixed { get; set; }
 }
 
 /// <summary>

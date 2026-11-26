@@ -10,11 +10,11 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Tasks;
 
-namespace Jellyfin.Plugin.Ronin.Tasks;
-using Jellyfin.Plugin.Ronin.Helpers;
+namespace Jellyfin.Plugin.Kanon.Tasks;
+using Jellyfin.Plugin.Kanon.Helpers;
 
 /// <summary>
-/// Scheduled task that removes all filler/canon tags previously assigned by the Ronin plugin.
+/// Scheduled task that removes all filler/canon tags previously assigned by the Kanon plugin.
 /// </summary>
 public class FillerResetTask : IScheduledTask
 {
@@ -37,11 +37,11 @@ public class FillerResetTask : IScheduledTask
     /// <inheritdoc />
     public string Name => "Reset Anime Canon/Filler Metadata Tags";
     /// <inheritdoc />
-    public string Key => "RoninFillerResetTask";
+    public string Key => "KanonFillerResetTask";
     /// <inheritdoc />
-    public string Description => "Removes all filler/canon tags previously set by the Ronin Plugin.";
+    public string Description => "Removes all filler/canon tags previously set by the Kanon Plugin.";
     /// <inheritdoc />
-    public string Category => "Ronin";
+    public string Category => "Kanon";
 
     /// <summary>
     /// Gets the default triggers for this scheduled task.

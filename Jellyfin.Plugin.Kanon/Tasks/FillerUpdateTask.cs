@@ -16,10 +16,10 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Tasks;
 
-using Jellyfin.Plugin.Ronin.Configuration;
-using Jellyfin.Plugin.Ronin.Helpers;
+using Jellyfin.Plugin.Kanon.Configuration;
+using Jellyfin.Plugin.Kanon.Helpers;
 
-namespace Jellyfin.Plugin.Ronin.Tasks;
+namespace Jellyfin.Plugin.Kanon.Tasks;
 
 /// <summary>
 /// Scheduled task responsible for updating anime series with filler/canon episode tags
@@ -58,11 +58,11 @@ public class FillerUpdateTask : IScheduledTask
     /// <inheritdoc />
     public string Name => "Update Anime Canon/Filler Metadata Tags";
     /// <inheritdoc />
-    public string Key => "RoninFillerUpdateTask";
+    public string Key => "KanonFillerUpdateTask";
     /// <inheritdoc />
     public string Description => "Checks your anime on animefillerlist.com and updates episode tags to mark canon or filler episodes.";
     /// <inheritdoc />
-    public string Category => "Ronin";
+    public string Category => "Kanon";
 
     /// <summary>
     /// Gets the default triggers for this scheduled task.  
@@ -101,7 +101,7 @@ public class FillerUpdateTask : IScheduledTask
             return;
         }
 
-        var httpClient = _httpClientFactory.CreateClient("RoninHttpClient");
+        var httpClient = _httpClientFactory.CreateClient("KanonHttpClient");
         double seriesProcessed = 0;
 
         foreach (var show in seriesList)
@@ -145,6 +145,7 @@ public class FillerUpdateTask : IScheduledTask
             }
 
             double episodeProcessed = 0;
+            var localAbsolute = ResolveEpisodeNumber.AbsoluteFromLibrary(episodes);
 
             foreach (var episode in episodes)
             {
@@ -153,6 +154,7 @@ public class FillerUpdateTask : IScheduledTask
                 await ProcessEpisodeAsync(
                     episode,
                     fillerData,
+                    localAbsolute,
                     httpClient,
                     cancellationToken
                 ).ConfigureAwait(false);
@@ -189,7 +191,7 @@ public class FillerUpdateTask : IScheduledTask
         return result;
     }
 
-    private async Task ProcessEpisodeAsync(Episode episode, Dictionary<int, string> fillerData, HttpClient httpClient, CancellationToken cancellationToken)
+    private async Task ProcessEpisodeAsync(Episode episode, Dictionary<int, string> fillerData, IReadOnlyDictionary<Guid, int> localAbsolute, HttpClient httpClient, CancellationToken cancellationToken)
     {
         // 0. Skip already-processed episodes
         if (episode.Tags != null && episode.Tags.Any(t => _fillerTags.Contains(t)))
@@ -227,7 +229,13 @@ public class FillerUpdateTask : IScheduledTask
             ).ConfigureAwait(false);
         }
 
-        // --- 3. Apply filler tag if resolved ---
+        // --- 3. Fallback to the library's own numbering (TMDB and other providers) ---
+        if ((!absoluteNumber.HasValue || absoluteNumber < 0) && localAbsolute.TryGetValue(episode.Id, out var local))
+        {
+            absoluteNumber = local;
+        }
+
+        // --- 4. Apply filler tag if resolved ---
         if (!absoluteNumber.HasValue || absoluteNumber < 0)
         {
             _logger.LogDebug("Could not resolve absolute episode number for {EpisodeName}, skipping.", episode.Name);

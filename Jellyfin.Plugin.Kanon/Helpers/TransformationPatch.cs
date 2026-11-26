@@ -1,10 +1,12 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Text.Json.Serialization;
-using Jellyfin.Plugin.Ronin.Configuration;
+using Jellyfin.Plugin.Kanon.Configuration;
 
-namespace Jellyfin.Plugin.Ronin.Helpers;
+namespace Jellyfin.Plugin.Kanon.Helpers;
 
 /// <summary>
 /// Provides methods to inject custom scripts and styles into Jellyfin's web frontend via FileTransformation.
@@ -12,7 +14,7 @@ namespace Jellyfin.Plugin.Ronin.Helpers;
 public static class TransformationPatch
 {
     /// <summary>
-    /// Injects the Ronin frontend CSS and JS into the provided HTML content.
+    /// Injects the Kanon frontend CSS and JS into the provided HTML content.
     /// </summary>
     /// <param name="payload">The payload object provided by the FileTransformation plugin. Expects a "contents" property containing HTML.</param>
     /// <returns>The modified HTML content with injected CSS and JS, or the original content if injection fails.</returns>
@@ -23,22 +25,26 @@ public static class TransformationPatch
 
         var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
 
-        // If all badge displays are disabled, do NOT inject anything.
-        if (!config.ShowBadgesOnEpisodePage && !config.ShowBadgesOnSeasonList)
-            return payload.Contents;
+        // Segment type covering each episode class, so the script can drop episodes the user skips from the play queue.
+        string segmentTypes = JsonSerializer.Serialize(new Dictionary<string, string>
+        {
+            ["Filler"] = config.FillerSegmentType ?? string.Empty,
+            ["Mixed Canon/Filler"] = config.MixedSegmentType ?? string.Empty,
+            ["Anime Canon"] = config.AnimeCanonSegmentType ?? string.Empty
+        });
 
-        // Hardcoded configuration for frontend usage
         string configScript = $@"
 <script>
-window.RoninVariables = {{
-    RONIN_SHOW_EPISODE_BADGES: {config.ShowBadgesOnEpisodePage.ToString().ToLowerInvariant()},
-    RONIN_SHOW_SEASON_LIST_BADGES: {config.ShowBadgesOnSeasonList.ToString().ToLowerInvariant()},
-    RONIN_ENABLE_BADGE_COLORS: {config.EnableBadgeColors.ToString().ToLowerInvariant()}
+window.KanonVariables = {{
+    KANON_SHOW_EPISODE_BADGES: {config.ShowBadgesOnEpisodePage.ToString().ToLowerInvariant()},
+    KANON_SHOW_SEASON_LIST_BADGES: {config.ShowBadgesOnSeasonList.ToString().ToLowerInvariant()},
+    KANON_ENABLE_BADGE_COLORS: {config.EnableBadgeColors.ToString().ToLowerInvariant()},
+    KANON_SEGMENT_TYPES: {segmentTypes}
 }};
 </script>";
 
-        string importedJS = ReadEmbeddedResource($"{typeof(Plugin).Namespace}.Inject.ronin.js");
-        string importedCSS = ReadEmbeddedResource($"{typeof(Plugin).Namespace}.Inject.ronin.css");
+        string importedJS = ReadEmbeddedResource($"{typeof(Plugin).Namespace}.Inject.kanon.js");
+        string importedCSS = ReadEmbeddedResource($"{typeof(Plugin).Namespace}.Inject.kanon.css");
 
         // Inject Config JS and CSS before </head>
         string result = Regex.Replace(payload.Contents, "(</head>)", $"{configScript}<style>{importedCSS}</style>$1", RegexOptions.IgnoreCase);
@@ -65,7 +71,7 @@ public class PatchRequestPayload
 {
     /// <summary>
     /// Gets or sets the HTML content provided by the FileTransformation plugin.
-    /// This is the string that will be modified to inject CSS and JavaScript for Ronin.
+    /// This is the string that will be modified to inject CSS and JavaScript for Kanon.
     /// </summary>
     [JsonPropertyName("contents")]
     public string? Contents { get; set; }

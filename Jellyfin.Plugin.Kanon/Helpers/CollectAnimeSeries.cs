@@ -6,10 +6,10 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Entities;
 using Jellyfin.Data.Enums;
 
-using Jellyfin.Plugin.Ronin.Configuration;
+using Jellyfin.Plugin.Kanon.Configuration;
 
 
-namespace Jellyfin.Plugin.Ronin.Helpers;
+namespace Jellyfin.Plugin.Kanon.Helpers;
 
 /// <summary>
 /// Collects anime series from the Jellyfin library based on the plugin configuration.
