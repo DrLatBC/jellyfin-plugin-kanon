@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/DrLatBC/jellyfin-plugin-kanon/main/Images/logo.jpg",
         "versions": [
             {
+                "version": "1.0.1.0",
+                "changelog": "Anime libraries: tick libraries in Kanon's settings and every series in them is treated as anime, whatever its genres and tags. For Shoko, AniDB and similar libraries that don't use an Anime genre or tag.",
+                "targetAbi": "12.4.0.0",
+                "sourceUrl": "https://github.com/DrLatBC/jellyfin-plugin-kanon/releases/download/v1.0.1.0/kanon_1.0.1.0.zip",
+                "checksum": "798A2EF826812236F4851B51F5AC3E9C",
+                "timestamp": "2026-11-26T04:37:08Z"
+            },
+            {
                 "version": "1.0.0.0",
                 "changelog": "First Kanon release: tags anime episodes as canon, mixed or filler from Anime Filler List; skips filler via media segments and by removing it from the web player's queue; builds no-filler playlists. Built for Jellyfin 12.4. Fork of Ronin by ahza-code.",
                 "targetAbi": "12.4.0.0",
