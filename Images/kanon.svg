@@ -1,23 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 667" width="2000" height="667" role="img" aria-label="Kanon, filler tracking and skipping for Jellyfin">
 <rect width="2000" height="667" fill="#0b0c0f"></rect><defs>
-<clipPath id="kanon-base"><rect x="0" y="0" width="2000" height="350"></rect></clipPath>
-<clipPath id="kanon-cap"><rect x="0" y="200" width="2000" height="150"></rect></clipPath>
+<clipPath id="wide-base"><rect x="0" y="0" width="2000" height="350"></rect></clipPath>
+<clipPath id="wide-cap"><rect x="0" y="164" width="2000" height="186"></rect></clipPath>
+<clipPath id="wide-foot"><rect x="0" y="333" width="2000" height="17"></rect></clipPath>
 </defs>
-<g transform="translate(164 0)">
-<rect x="230" y="200" width="32" height="150" fill="#eceef2"></rect>
-<polyline points="440,190 292,275 440,360" fill="none" stroke="#eceef2" stroke-width="32" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="url(#kanon-cap)"></polyline>
-<g clip-path="url(#kanon-base)">
-<polyline points="488,362 620,206 752,362" fill="none" stroke="#eceef2" stroke-width="32" stroke-linejoin="miter" stroke-miterlimit="10"></polyline>
-<polyline points="542,362 620,270 698,362" fill="none" stroke="#e3161f" stroke-width="20" stroke-linejoin="miter" stroke-miterlimit="10"></polyline>
-<polyline points="580,362 620,315 660,362" fill="none" stroke="#e3161f" stroke-width="20" stroke-linejoin="miter" stroke-miterlimit="10"></polyline>
+<g transform="translate(364.9999999859199 0)">
+<rect x="0" y="164" width="32" height="186" fill="#eceef2"></rect>
+<polyline points="221.16607865406638,151.6 62,257 221.16607865406638,362.4" fill="none" stroke="#eceef2" stroke-width="32" stroke-linejoin="miter" stroke-miterlimit="10" clip-path="url(#wide-cap)"></polyline>
+<g clip-path="url(#wide-base)">
+<polyline points="271.42608640810204,364.88 375.0000000276575,194.76643311376526 478.573913647213,364.88" fill="none" stroke="#eceef2" stroke-width="32" stroke-linejoin="miter" stroke-miterlimit="10"></polyline>
+<polyline points="271.42608640810204,395.64662029932384 375.0000000276575,225.5330534130891 478.573913647213,395.64662029932384" fill="none" stroke="#e3161f" stroke-width="0" stroke-linejoin="miter" stroke-miterlimit="10" opacity="0"></polyline>
+<polyline points="319.7445476296276,364.88 375.0000000276575,274.1264331137653 430.2554524256874,364.88" fill="none" stroke="#e3161f" stroke-width="16.10560882847576" stroke-linejoin="miter" stroke-miterlimit="10"></polyline>
+<polyline points="353.71846567601267,364.88 375.0000000276575,329.92643311376526 396.28153437930234,364.88" fill="none" stroke="#e3161f" stroke-width="16.10560882847576" stroke-linejoin="miter" stroke-miterlimit="10"></polyline>
+<g clip-path="url(#wide-foot)" opacity="0.65">
+<polyline points="319.7445476296276,364.88 375.0000000276575,274.1264331137653 430.2554524256874,364.88" fill="none" stroke="#000000" stroke-width="16.10560882847576" stroke-linejoin="miter" stroke-miterlimit="10"></polyline>
+<polyline points="353.71846567601267,364.88 375.0000000276575,329.92643311376526 396.28153437930234,364.88" fill="none" stroke="#000000" stroke-width="16.10560882847576" stroke-linejoin="miter" stroke-miterlimit="10"></polyline>
 </g>
-<rect x="800" y="200" width="32" height="150" fill="#eceef2"></rect>
-<rect x="944" y="200" width="32" height="150" fill="#eceef2"></rect>
-<polygon points="800,200 838,200 976,350 938,350" fill="#eceef2"></polygon>
-<rect x="1042" y="216" width="158" height="118" rx="30" fill="none" stroke="#eceef2" stroke-width="32"></rect>
-<rect x="1266" y="200" width="32" height="150" fill="#eceef2"></rect>
-<rect x="1410" y="200" width="32" height="150" fill="#eceef2"></rect>
-<polygon points="1266,200 1304,200 1442,350 1404,350" fill="#eceef2"></polygon>
 </g>
-<text x="1000" y="452" text-anchor="middle" fill="#c9ccd4" style="font-family: Montserrat, sans-serif; font-weight: 500; font-size: 40px; letter-spacing: 13px">FILLER TRACKING AND SKIPPING FOR JELLYFIN</text>
+<rect x="520.0000000281602" y="164" width="32" height="186" fill="#eceef2"></rect>
+<rect x="718.0000000281602" y="164" width="32" height="186" fill="#eceef2"></rect>
+<polygon points="520.0000000281602,164 565.1188968192425,164 750.0000000281602,350 704.8811032370779,350" fill="#eceef2"></polygon>
+<rect x="796.0000000281602" y="180" width="198" height="154" rx="30" fill="none" stroke="#eceef2" stroke-width="32"></rect>
+<rect x="1040.0000000281602" y="164" width="32" height="186" fill="#eceef2"></rect>
+<rect x="1238.0000000281602" y="164" width="32" height="186" fill="#eceef2"></rect>
+<polygon points="1040.0000000281602,164 1085.1188968192425,164 1270.0000000281602,350 1224.881103237078,350" fill="#eceef2"></polygon>
+</g>
+<text x="364.9999999859199" y="440" textLength="1270.0000000281602" lengthAdjust="spacing" fill="#c9ccd4" style="font-family: Montserrat, sans-serif; font-weight: 500; font-size: 33px">FILLER TRACKING AND SKIPPING FOR JELLYFIN</text>
 </svg>
