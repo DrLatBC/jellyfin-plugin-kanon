@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="512" height="512">
+<defs>
+<clipPath id="kanon-icon-base"><rect x="0" y="0" width="2000" height="350"/></clipPath>
+<clipPath id="kanon-icon-foot"><rect x="0" y="333" width="2000" height="17"/></clipPath>
+</defs>
+<rect width="300" height="300" rx="60" fill="#0b0c0f"/>
+<g transform="translate(150 150) scale(0.9130434782608695) translate(-375 -257)">
+<g clip-path="url(#kanon-icon-base)">
+<polyline points="271.426,364.88 375,194.766 478.574,364.88" fill="none" stroke="#eceef2" stroke-width="32" stroke-linejoin="miter" stroke-miterlimit="10"/>
+<polyline points="319.745,364.88 375,274.126 430.255,364.88" fill="none" stroke="#e3161f" stroke-width="16.106" stroke-linejoin="miter" stroke-miterlimit="10"/>
+<polyline points="353.718,364.88 375,329.926 396.282,364.88" fill="none" stroke="#e3161f" stroke-width="16.106" stroke-linejoin="miter" stroke-miterlimit="10"/>
+<g clip-path="url(#kanon-icon-foot)" opacity="0.65">
+<polyline points="319.745,364.88 375,274.126 430.255,364.88" fill="none" stroke="#000000" stroke-width="16.106" stroke-linejoin="miter" stroke-miterlimit="10"/>
+<polyline points="353.718,364.88 375,329.926 396.282,364.88" fill="none" stroke="#000000" stroke-width="16.106" stroke-linejoin="miter" stroke-miterlimit="10"/>
+</g>
+</g>
+</g>
+</svg>
