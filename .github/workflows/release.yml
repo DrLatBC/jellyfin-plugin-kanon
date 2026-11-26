@@ -35,6 +35,9 @@ jobs:
           abi=$(grep -oP 'Include="Jellyfin.Controller" Version="\K[0-9.]+' Jellyfin.Plugin.Kanon/Jellyfin.Plugin.Kanon.csproj)
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "abi=$abi.0" >> "$GITHUB_OUTPUT"
+          # actions/checkout replaces an annotated tag with a lightweight one, whose contents are the
+          # commit message; fetch the real tag so its annotation becomes the changelog.
+          git fetch --force origin "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
           git tag -l --format='%(contents)' "$GITHUB_REF_NAME" > changelog.txt
           if ! grep -q '[^[:space:]]' changelog.txt; then echo "Release $version" > changelog.txt; fi
 

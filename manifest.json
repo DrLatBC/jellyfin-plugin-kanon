@@ -10,7 +10,7 @@
         "versions": [
             {
                 "version": "1.0.0.0",
-                "changelog": "Add the Kanon A icon\n\nThe A from the wordmark on a dark rounded tile: icon.svg and a 512 px transparent icon.png.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+                "changelog": "First Kanon release: tags anime episodes as canon, mixed or filler from Anime Filler List; skips filler via media segments and by removing it from the web player's queue; builds no-filler playlists. Built for Jellyfin 12.4. Fork of Ronin by ahza-code.",
                 "targetAbi": "12.4.0.0",
                 "sourceUrl": "https://github.com/DrLatBC/jellyfin-plugin-kanon/releases/download/v1.0.0.0/kanon_1.0.0.0.zip",
                 "checksum": "1A93D4ACFB5F9C284A4C7F206E77B889",
