@@ -29,11 +29,17 @@ Run these from Dashboard → Scheduled Tasks → Kanon, in this order:
 2. **Update Filler Skip Segments.** This adds the skip segments, explained below.
 3. **Build No-Filler Playlists.** Optional.
 
+![Kanon's scheduled tasks](Images/screenshots/tasks.png)
+
 ## Features
 
 ### Canon and filler tags
 
 Each episode gets one tag: `Manga Canon`, `Anime Canon`, `Mixed Canon/Filler` or `Filler`. Tags are ordinary Jellyfin tags, so you can filter on them anywhere. If File Transformation is installed, they also show as badges on episode pages and in season lists.
+
+![Canon, mixed and filler badges in a season list](Images/screenshots/season-badges.jpg)
+
+![A filler badge on an episode page](Images/screenshots/episode-badge.jpg)
 
 To match an episode to Anime Filler List, Kanon needs its absolute episode number. It uses TheTVDB or AniDB when the series has those IDs. Otherwise it reads the library's own numbering: TMDB numbers long anime continuously (Naruto season 2 starts at episode 53), and seasons that restart at 1 are added up.
 
@@ -56,6 +62,10 @@ In Kanon's settings, choose which segment type covers each class of episode:
 Give mixed episodes a different type, such as Recap, to act on them separately (for example: skip filler, ask on mixed). Run **Update Filler Skip Segments** again after changing these settings. Segments from other providers, such as intros and credits, are never touched.
 
 Skipping works in any Jellyfin client that supports media segments.
+
+In the web client, and the phone apps built on it, Kanon also takes episodes set to **Skip** out of the play queue when playback starts. Long runs of filler are then passed over entirely instead of each one loading and skipping in turn. This needs File Transformation.
+
+![Kanon's settings: badges, anime identification and filler skipping](Images/screenshots/settings.png)
 
 ### No-filler playlists
 
