@@ -1,5 +1,7 @@
 # Kanon: Filler Tracking and Skipping for Jellyfin
 
+![Kanon: filler tracking and skipping for Jellyfin](Images/banner.png)
+
 Kanon marks anime episodes as **Manga Canon**, **Anime Canon**, **Mixed Canon/Filler** or **Filler**, and can skip filler for you. Filler is skipped either automatically in the normal player, through Jellyfin's Media Segment Actions, or by playing a no-filler playlist.
 
 Kanon is a fork of [Ronin](https://github.com/ahza-code/jellyfin-plugin-ronin) by [ahza-code](https://github.com/ahza-code). See [Changes from Ronin](#changes-from-ronin).
