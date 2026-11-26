@@ -1,0 +1,96 @@
+name: Release
+
+# Push a tag like v1.0.0.0 to build the plugin, attach the zip to a GitHub release,
+# and add the version to manifest.json so Jellyfin's catalog offers it.
+# The tag's annotation message becomes the changelog.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Read version and target
+        id: meta
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag must look like v1.2.3.4, got $GITHUB_REF_NAME" >&2
+            exit 1
+          fi
+          abi=$(grep -oP 'Include="Jellyfin.Controller" Version="\K[0-9.]+' Jellyfin.Plugin.Kanon/Jellyfin.Plugin.Kanon.csproj)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "abi=$abi.0" >> "$GITHUB_OUTPUT"
+          git tag -l --format='%(contents)' "$GITHUB_REF_NAME" > changelog.txt
+          if ! grep -q '[^[:space:]]' changelog.txt; then echo "Release $version" > changelog.txt; fi
+
+      - name: Build
+        run: >
+          dotnet publish Jellyfin.Plugin.Kanon -c Release -o publish
+          -p:Version=${{ steps.meta.outputs.version }}
+          -p:AssemblyVersion=${{ steps.meta.outputs.version }}
+
+      - name: Package
+        id: package
+        run: |
+          zip="kanon_${{ steps.meta.outputs.version }}.zip"
+          (cd publish && zip "../$zip" Jellyfin.Plugin.Kanon.dll HtmlAgilityPack.dll)
+          echo "zip=$zip" >> "$GITHUB_OUTPUT"
+          echo "checksum=$(md5sum "$zip" | cut -d' ' -f1 | tr a-f A-F)" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "$GITHUB_REF_NAME" "${{ steps.package.outputs.zip }}"
+          --title "Kanon ${{ steps.meta.outputs.version }}"
+          --notes-file changelog.txt
+
+      - name: Add version to manifest.json
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          ABI: ${{ steps.meta.outputs.abi }}
+          CHECKSUM: ${{ steps.package.outputs.checksum }}
+          URL: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.package.outputs.zip }}
+        run: |
+          git fetch origin main
+          git checkout main
+          python3 - <<'EOF'
+          import json, os, datetime
+          with open("manifest.json", encoding="utf-8") as f:
+              manifest = json.load(f)
+          with open("changelog.txt", encoding="utf-8") as f:
+              changelog = f.read().strip()
+          plugin = manifest[0]
+          plugin["versions"] = [v for v in plugin["versions"] if v["version"] != os.environ["VERSION"]]
+          plugin["versions"].insert(0, {
+              "version": os.environ["VERSION"],
+              "changelog": changelog,
+              "targetAbi": os.environ["ABI"],
+              "sourceUrl": os.environ["URL"],
+              "checksum": os.environ["CHECKSUM"],
+              "timestamp": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+          })
+          with open("manifest.json", "w", encoding="utf-8") as f:
+              json.dump(manifest, f, indent=4, ensure_ascii=False)
+              f.write("\n")
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          git commit -m "Add ${{ steps.meta.outputs.version }} to manifest"
+          git push origin main

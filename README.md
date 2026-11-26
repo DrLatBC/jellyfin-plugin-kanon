@@ -80,6 +80,20 @@ Kanon never moves, renames or re-seasons episodes. It only adds tags, skip segme
 - Ronin's season re-organisation tasks (Aired Seasons and Force Single Season) are removed. Kanon leaves the library layout alone.
 - Renamed, with a new plugin ID, so it installs alongside or instead of Ronin without conflicts.
 
+## Releasing
+
+Push an annotated tag with a four-part version:
+
+```bash
+git tag -a v1.0.0.0 -m "What changed in this release"
+git push origin v1.0.0.0
+```
+
+The Release workflow then:
+1. builds the plugin;
+2. attaches `kanon_<version>.zip` to a GitHub release, using the tag message as the release notes;
+3. adds the version to `manifest.json` with its checksum and target Jellyfin version, which it reads from the `Jellyfin.Controller` package version.
+
 ## License
 
 Kanon is licensed under the **GNU General Public License v3.0**, the same licence as Ronin. See [LICENSE](LICENSE).
