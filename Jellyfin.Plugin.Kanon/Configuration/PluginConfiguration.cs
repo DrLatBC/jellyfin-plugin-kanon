@@ -48,6 +48,12 @@ public class PluginConfiguration : BasePluginConfiguration
     public string[] AnimeLibraryIds { get; set; } = Array.Empty<string>();
 
     /// <summary>
+    /// Gets or sets where filler data comes from: "FillerLists" uses FillerLists for the series it
+    /// covers (matched by id) and Anime Filler List for the rest; "AnimeFillerList" uses only Anime Filler List.
+    /// </summary>
+    public string FillerSource { get; set; } = "FillerLists";
+
+    /// <summary>
     /// Gets or sets the media segment type that covers Filler episodes (a MediaSegmentType name, or empty for none).
     /// The per-user Media Segment Actions setting for that type decides whether the episode is skipped, offered for skipping or played.
     /// </summary>

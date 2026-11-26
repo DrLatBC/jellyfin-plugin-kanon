@@ -104,17 +104,55 @@ public class FillerUpdateTask : IScheduledTask
         var httpClient = _httpClientFactory.CreateClient("KanonHttpClient");
         double seriesProcessed = 0;
 
+        FillerListsSource? fillerLists = null;
+        if (!string.Equals(_config.FillerSource, "AnimeFillerList", StringComparison.Ordinal))
+        {
+            try
+            {
+                fillerLists = await FillerListsSource.LoadAsync(httpClient, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not load the FillerLists index; using Anime Filler List for every series");
+            }
+        }
+
         foreach (var show in seriesList)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var slugCandidates = BuildSlugCandidates(show);
 
-            var fillerData = await TryGetFillerDataAsync(
-                httpClient,
-                slugCandidates,
-                cancellationToken
-            ).ConfigureAwait(false);
+            Dictionary<int, string>? fillerData = null;
+            var fillerListsUrl = fillerLists?.Match(show);
+            if (fillerListsUrl != null)
+            {
+                try
+                {
+                    fillerData = await FillerListsSource.LoadEpisodesAsync(httpClient, fillerListsUrl, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Could not load FillerLists data for {ShowName}; trying Anime Filler List", show.Name);
+                }
+            }
+
+            if (fillerData == null || fillerData.Count == 0)
+            {
+                fillerData = await TryGetFillerDataAsync(
+                    httpClient,
+                    slugCandidates,
+                    cancellationToken
+                ).ConfigureAwait(false);
+            }
 
             if (fillerData == null || fillerData.Count == 0)
             {
@@ -329,9 +367,14 @@ public class FillerUpdateTask : IScheduledTask
                 slugs.Add(strippedTvdb);
         }
 
-        var generatedSlug = GenerateSlug(show.Name);
-        if (!string.IsNullOrWhiteSpace(generatedSlug))
+        // The displayed name first, then the original title: on a non-English server the name is
+        // translated ("Anna dai capelli rossi"), while Anime Filler List's pages follow the original.
+        foreach (var title in new[] { show.Name, show.OriginalTitle })
         {
+            var generatedSlug = GenerateSlug(title);
+            if (string.IsNullOrWhiteSpace(generatedSlug))
+                continue;
+
             slugs.Add(generatedSlug);
 
             var strippedGenerated = RemoveArticlesAndPrepositionsFromSlug(generatedSlug);

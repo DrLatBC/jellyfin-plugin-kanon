@@ -25,7 +25,7 @@ Kanon is a fork of [Ronin](https://github.com/ahza-code/jellyfin-plugin-ronin) b
 
 Run these from Dashboard → Scheduled Tasks → Kanon, in this order:
 
-1. **Update Anime Canon/Filler Metadata Tags.** This looks up every anime series on [Anime Filler List](https://www.animefillerlist.com) and tags each episode.
+1. **Update Anime Canon/Filler Metadata Tags.** This looks up every anime series and tags each episode (see [Filler data](#filler-data)).
 2. **Update Filler Skip Segments.** This adds the skip segments, explained below.
 3. **Build No-Filler Playlists.** Optional.
 
@@ -41,7 +41,16 @@ Each episode gets one tag: `Manga Canon`, `Anime Canon`, `Mixed Canon/Filler` or
 
 ![A filler badge on an episode page](Images/screenshots/episode-badge.jpg)
 
-To match an episode to Anime Filler List, Kanon needs its absolute episode number. It uses TheTVDB or AniDB when the series has those IDs. Otherwise it reads the library's own numbering: TMDB numbers long anime continuously (Naruto season 2 starts at episode 53), and seasons that restart at 1 are added up.
+### Filler data
+
+Kanon has two sources:
+
+- [FillerLists](https://fillerlists.com/data) covers a set of long-running series (Naruto, Naruto Shippuden, One Piece, Bleach, Dragon Ball and others). Series are matched by their TMDB, TheTVDB or IMDb id, and each label is checked against two independent sources.
+- [Anime Filler List](https://www.animefillerlist.com) covers everything else. Series are matched by name, trying the original title too, so translated names on non-English servers still match.
+
+By default Kanon uses FillerLists where it has the series and Anime Filler List otherwise; **Filler data source** in the settings can switch to Anime Filler List only. The two classify some episodes differently: FillerLists calls far fewer episodes mixed. An episode keeps its tag once set, so after switching run **Reset Anime Canon/Filler Metadata Tags** and then the update task.
+
+To match an episode to its list, Kanon needs its absolute episode number. It uses TheTVDB or AniDB when the series has those IDs. Otherwise it reads the library's own numbering: TMDB numbers long anime continuously (Naruto season 2 starts at episode 53), and seasons that restart at 1 are added up.
 
 ### Skipping filler in the normal player
 
@@ -92,6 +101,9 @@ Kanon never moves, renames or re-seasons episodes. It only adds tags, skip segme
 - Absolute episode numbers from the library's own numbering, so TMDB libraries work without TheTVDB or AniDB.
 - Anime identification defaults to Genre or Tag, so TMDB libraries are found.
 - Whole libraries can be marked as anime ([Ronin #5](https://github.com/ahza-code/jellyfin-plugin-ronin/issues/5)).
+- FillerLists, matched by series id, as the first filler source ([Ronin #7](https://github.com/ahza-code/jellyfin-plugin-ronin/issues/7)).
+- Original titles are tried when matching, for non-English servers ([Ronin #6](https://github.com/ahza-code/jellyfin-plugin-ronin/issues/6)).
+- Badges work on servers with a base URL ([Ronin #3](https://github.com/ahza-code/jellyfin-plugin-ronin/issues/3)).
 - Ronin's season re-organisation tasks (Aired Seasons and Force Single Season) are removed. Kanon leaves the library layout alone.
 - Renamed, with a new plugin ID, so it installs alongside or instead of Ronin without conflicts.
 
@@ -116,4 +128,4 @@ Kanon is licensed under the **GNU General Public License v3.0**, the same licenc
 Original work: Copyright (c) ahza-code, [Ronin](https://github.com/ahza-code/jellyfin-plugin-ronin).
 Modifications: Copyright (c) DrLatBC.
 
-Filler data comes from [Anime Filler List](https://www.animefillerlist.com).
+Anime filler data from [FillerLists](https://fillerlists.com/data) and its sources, under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), and from [Anime Filler List](https://www.animefillerlist.com).

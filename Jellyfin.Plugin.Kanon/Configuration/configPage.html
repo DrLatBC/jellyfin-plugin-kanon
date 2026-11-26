@@ -83,6 +83,15 @@
                     <div class="fieldDescription">Tag name to match when identification mode includes "Tag". Default: Anime</div>
                 </div>
 
+                <div class="selectContainer">
+                    <label class="selectLabel" for="FillerSource">Filler data source</label>
+                    <select id="FillerSource" is="emby-select" class="emby-select-withcolor emby-select" data-id="FillerSource">
+                        <option value="FillerLists">FillerLists where available, then Anime Filler List</option>
+                        <option value="AnimeFillerList">Anime Filler List only</option>
+                    </select>
+                    <div class="fieldDescription">FillerLists covers a set of long-running series (Naruto, One Piece, Bleach and others), matched by TMDB, TheTVDB or IMDb id. Everything else comes from Anime Filler List. The two sources can classify some episodes differently, especially mixed ones. Episodes keep their tag once set, so after switching run "Reset Anime Canon/Filler Metadata Tags" and then the update task.</div>
+                </div>
+
                 <div class="verticalSection" style="margin-bottom: 2em;">
                     <div class="inputLabel" style="margin-bottom: 0.5em;">Anime libraries</div>
                     <div id="animeLibraries"></div>
@@ -196,6 +205,7 @@
                             field('MixedSegmentType').value = config.MixedSegmentType || '';
                             field('AnimeCanonSegmentType').value = config.AnimeCanonSegmentType || '';
                             field('PlaylistExcludeMixed').checked = config.PlaylistExcludeMixed;
+                            field('FillerSource').value = config.FillerSource || 'FillerLists';
                             updateStates();
                         })
                         .catch(function (error) { console.error(error); })
@@ -216,6 +226,7 @@
                         MixedSegmentType: field('MixedSegmentType').value,
                         AnimeCanonSegmentType: field('AnimeCanonSegmentType').value,
                         PlaylistExcludeMixed: field('PlaylistExcludeMixed').checked,
+                        FillerSource: field('FillerSource').value,
                         AnimeLibraryIds: Array.prototype.map.call(
                             page.querySelectorAll('[data-library-id]:checked'),
                             function (input) { return input.getAttribute('data-library-id'); })

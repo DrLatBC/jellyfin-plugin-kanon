@@ -50,7 +50,8 @@
             return null;
         }
         const userId = ApiClient.getCurrentUserId();
-        const url = `/Users/${userId}/Items/${itemId}`;
+        // ApiClient.getUrl adds the server's base URL (e.g. /jellyfin); a bare path breaks behind a reverse proxy.
+        const url = ApiClient.getUrl(`Users/${userId}/Items/${itemId}`);
         try {
             return await ApiClient.getJSON(url);
         } catch (error) { return null; }
@@ -66,7 +67,7 @@
         lastProcessedItemId = seasonId;
         
         const userId = ApiClient.getCurrentUserId();
-        const url = `/Shows/${seasonId}/Episodes?seasonId=${seasonId}&userId=${userId}&Fields=Tags`; 
+        const url = ApiClient.getUrl(`Shows/${seasonId}/Episodes`, { seasonId: seasonId, userId: userId, Fields: 'Tags' });
         
         try {
             const response = await ApiClient.getJSON(url);
